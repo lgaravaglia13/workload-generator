@@ -1,0 +1,37 @@
+start: phase ("|" phase)*
+phase: "P" NUMBER ("-" NUMBER)? ":" operation (";" operation)*
+operation: query | insert | update | delete
+query: "Q" ":" query_params
+insert: "I" ":" uid_params
+update: "U" ":" uid_params
+delete: "D" ":" uid_params
+
+// Each query type has a short and a long form, keyed on the leading token.
+// The long form targets an explicit percentile pivot with an explicit dist.
+// The short form generate queries uniformly over the whole dataset.
+
+query_params: point_params | range_params | knn_params
+point_params: "p" "," total_query "," percentile_loc "," distribution
+            | "p" "," total_query
+range_params: "r" "," total_query "," range_offset "," percentile_loc "," distribution
+            | "r" "," total_query "," range_offset
+knn_params: "k" "," total_query "," neighbor_k "," percentile_loc "," distribution
+           | "k" "," total_query "," neighbor_k
+
+total_query: NUMBER
+range_offset: NUMBER
+neighbor_k: NUMBER
+
+uid_params: batch_size "," percentile_loc "," distribution "," sortedness
+
+batch_size: NUMBER
+percentile_loc: NUMBER
+distribution: DISTRIBUTION
+sortedness: SORTEDNESS
+
+DISTRIBUTION: "g" | "z" | "r"
+SORTEDNESS: "s" | "u"
+
+%import common.NUMBER
+%import common.WS
+%ignore WS
